@@ -5,7 +5,7 @@ Power structure data is entered in an Excel file (data/Empire structure maps.xls
 
 Coordinates are provided by a kml file (data/empire structure_cities.kml), which is converted into a csv file in QGIS. 
 
-Data is then extracted from the three csv files by a Python script (data/csv2geojson.py) and converted to geojson files. These are then packaged as javascript files to facilitate importing into the html file (PowerLines.html).
+Data is then extracted from the three csv files by a Python script (csv2geojson.py) and converted to geojson files. These are then packaged as javascript files to facilitate importing into the html file (PowerLines.html).
 
 # To do: 
 * improve the data.
