@@ -12,6 +12,10 @@ procedure:
    which are then wrapped in javascript files to facilitate importing
 """
 
+import simplekml
+from openpyxl import *
+from bs4 import BeautifulSoup
+
 import datetime
 import json
 import copy
@@ -56,15 +60,22 @@ control_types = {"intermittent":"",
                  "suzerainty":"",
                  }
 
-def load_csv(fp, separator=",", encoding="utf-8"):
-    with open(fp, mode="r", encoding=encoding) as file:
-        raw = file.read().splitlines()
-        data = [line.split(separator) for line in raw[1:]]
+def load_xlsx_sheet(fp, sheetname):
+    wb = load_workbook(fp, data_only=True)
+    ws = wb[sheetname]
+    data = []
+    for row in ws.rows:
+        current_row = []
+        for cell in row:
+            current_row.append(cell.value)
+        data.append(current_row)
     return data
+    
 
 def write_geojson(outpth, data):
     with open(outpth, mode="w", encoding="utf-16") as outfile:
         json.dump(data, outfile, ensure_ascii=False, indent=4, sort_keys=True)
+        
 
 def geojson2js(inpth, outpth, var_name):
     with open(inpth, mode="r", encoding="utf-16") as file:
@@ -76,16 +87,42 @@ def geojson2js(inpth, outpth, var_name):
 ##    with open(outpth, 'w+b') as outfile:
 ##        outfile.write(data.decode("utf-16").encode("utf-8"))
 
-def load_coordinates(coordinates_fp, separator=",", encoding="utf-8"):
+
+def load_kml_data(kml_fp):
+    """X,Y,Name,description,"""
+    with open(kml_fp, mode="r", encoding="utf-8") as file:
+        s = BeautifulSoup(file, "xml")
+    all_places = []
+    for placemark in s.find_all("Placemark"):
+        if placemark.find('coordinates'):
+            coordinates = placemark.find('coordinates').string
+            place = coordinates.split(",")[:2]
+        if placemark.find('name'):
+            name = placemark.find('name').string
+        else:
+            name = "None"
+        place.append(name)
+        if placemark.find('description'):
+            description = placemark.find('description').string
+        else:
+            description = ""
+        place.append(description)
+        #print(place)
+        all_places.append(place)
+    return all_places
+
+
+def load_coordinates(kml_fp, separator=",", encoding="utf-8"):
     """the coordinates csv has as first three columns lon, lat, name"""
-    data = load_csv(coordinates_fp)
+    data = load_kml_data(kml_fp)
     coord = {}
     for i, line in enumerate(data):
         print(i, line[2])
         coord[line[2]] = [float(line[0]), float(line[1])]
     return coord
 
-def load_features(features_fp, feature_type,
+
+def load_features(features_fp, sheetname, feature_type,
                   capital_types, coord, version, version_date,
                   separator="\t", encoding="utf-16"):
     """csv columns for Points:
@@ -115,7 +152,8 @@ def load_features(features_fp, feature_type,
     9: notes
     """
     
-    data = load_csv(features_fp, separator, encoding)
+    data = load_xlsx_sheet(features_fp, sheetname)
+    print(data[:3])
     geojson_coll = copy.deepcopy(geojson)
     #print(data[2])
     for i, line in enumerate(data[1:]):
@@ -161,25 +199,20 @@ def load_features(features_fp, feature_type,
     return geojson_coll
 
 
-
-    
-    
-
-coord_csv = "data/empire structure_cities_kml_export.csv"
-points_csv = "data/Empire structure maps_points.csv"
-lines_csv = "data/Empire structure maps_lines.csv"
+xlsx_fp = "data/Empire structure maps.xlsx"
+kml_fp = "data/empire structure_cities.kml"
 
 version = "1"
 version_date = str(datetime.datetime.now())
 
-coord = load_coordinates(coord_csv, separator=",", encoding="utf-8")
+coord = load_coordinates(kml_fp, separator=",", encoding="utf-8")
 print(coord)
-points_geojson = load_features(points_csv, "Point",
+points_geojson = load_features(xlsx_fp, "points", "Point",
                   capital_types, coord, version, version_date,
                   separator="\t", encoding="utf-16")
 #print(points_geojson)
 write_geojson("data/points.geojson", points_geojson)
-lines_geojson = load_features(lines_csv, "LineString",
+lines_geojson = load_features(xlsx_fp, "lines", "LineString",
                   capital_types, coord, version, version_date,
                   separator="\t", encoding="utf-16")    
 write_geojson("data/lines.geojson", lines_geojson)
