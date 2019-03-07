@@ -117,7 +117,7 @@ def load_coordinates(kml_fp, separator=",", encoding="utf-8"):
     data = load_kml_data(kml_fp)
     coord = {}
     for i, line in enumerate(data):
-        print(i, line[2])
+        #print(i, line[2])
         coord[line[2]] = [float(line[0]), float(line[1])]
     return coord
 
@@ -153,7 +153,7 @@ def load_features(features_fp, sheetname, feature_type,
     """
     
     data = load_xlsx_sheet(features_fp, sheetname)
-    print(data[:3])
+    #print(data[:3])
     geojson_coll = copy.deepcopy(geojson)
     #print(data[2])
     for i, line in enumerate(data[1:]):
@@ -162,7 +162,7 @@ def load_features(features_fp, sheetname, feature_type,
             try: 
                 feat = copy.deepcopy(geojson_feature)
                 if feature_type == "Point":
-                    print(line[0])
+                    #print(line[0])
                     feat["geometry"]["type"] = "Point"
                     feat["geometry"]["coordinates"] = coord[line[0]]
                     feat["properties"]["name"] = line[0]
@@ -170,6 +170,10 @@ def load_features(features_fp, sheetname, feature_type,
                     feat["properties"]["start"] = line[6]
                     feat["properties"]["end"] = line[7]
                     feat["properties"]["ref"] = line[8]
+                    if line[9]:
+                        feat["properties"]["notes"] = line[9]
+                    else:
+                        feat["properties"]["notes"] = ""
                     feat["properties"]["marker_size"] = capital_types[line[1]]["marker_size"]
                     feat["properties"]["marker_colour"] = capital_types[line[1]]["marker_colour"]
                     feat["properties"]["version"] = version
@@ -182,13 +186,16 @@ def load_features(features_fp, sheetname, feature_type,
                     feat["properties"]["name"] = "{} - {}".format(line[0], line[1])
                     feat["properties"]["start"] = line[4]
                     feat["properties"]["end"] = line[5]
-                    feat["properties"]["marker_size"] = line[6]
+                    feat["properties"]["marker_size"] = (int(line[6])/3)*2
                     feat["properties"]["marker_colour"] = "green" ####
                     if line[5] in control_types:
                         feat["properties"]["line_style"] = control_types[line[7]]
                     else:
                         feat["properties"]["line_style"] = None ####
-                    feat["properties"]["notes"] = line[9]
+                    if line[9]:
+                        feat["properties"]["notes"] = line[9]
+                    else:
+                        feat["properties"]["notes"] = ""
                     feat["properties"]["version"] = version
                     feat["properties"]["version_date"] = version_date
                 else:
@@ -206,7 +213,7 @@ version = "1"
 version_date = str(datetime.datetime.now())
 
 coord = load_coordinates(kml_fp, separator=",", encoding="utf-8")
-print(coord)
+#print(coord)
 points_geojson = load_features(xlsx_fp, "points", "Point",
                   capital_types, coord, version, version_date,
                   separator="\t", encoding="utf-16")
