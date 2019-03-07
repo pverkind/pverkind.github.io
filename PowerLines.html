@@ -59,6 +59,8 @@
       
       
       var slider = L.timelineSliderControl({
+        enableKeyboardControls: true,
+        duration: 70000,
         formatOutput: function(date){
           return moment(date).format("YYYY");
         }
@@ -68,7 +70,9 @@
       function linePopUp (feature, layer) {
           if (feature.properties && feature.properties.name) 
               {layer.bindPopup(
-                  feature.properties.name + '<p>(' + feature.properties.start + ' to ' + feature.properties.end +')</p>'
+                  feature.properties.name
+                  + '<p>(' + feature.properties.start + ' to ' + feature.properties.end +')</p>'
+                  + '<p>' + feature.properties.notes + '</p>'
                   )
               }
           };
@@ -77,7 +81,9 @@
       function pointPopUp (feature, layer) {
           if (feature.properties && feature.properties.name) 
               {layer.bindPopup(
-                  "<h1>" + feature.properties.name + '</h1>' + '<p>' + feature.properties.capital_type + '</p>'
+                  "<h1>" + feature.properties.name + '</h1>' 
+                  + '<p>' + feature.properties.capital_type + '</p>'
+                  + '<p>' + feature.properties.notes + '</p>'
                   )
               }
           };
