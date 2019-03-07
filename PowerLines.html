@@ -30,9 +30,28 @@
       .leaflet-left {
         width: 100%;
       }
+      #info{
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 20vw;
+        padding: 1em;
+      }
+      #map{
+        position: fixed;
+        top: 0;
+        left: 22vw;
+        bottom: 0;
+        right: 0;
+      }
     </style>
   </head>
   <body>
+    <div id="info">
+      <h1>Power structure events: </h1>
+      <ul id="displayed-list"></ul>
+    </div>
     <div id="map"></div>
     <script>
       
@@ -66,7 +85,20 @@
         }
       });
       map.addControl(slider);
-      
+ 
+      function updateList(timeline){
+        var displayed = timeline.getLayers();
+        var list = document.getElementById('displayed-list');
+        list.innerHTML = "";
+        displayed.forEach(function(el){
+          var li = document.createElement('li');
+          if (el.feature.properties.notes) { 
+            li.innerHTML = el.feature.properties.name + ": " + el.feature.properties.notes;
+            list.appendChild(li)
+            };
+        });
+      }
+ 
       function linePopUp (feature, layer) {
           if (feature.properties && feature.properties.name) 
               {layer.bindPopup(
@@ -118,6 +150,11 @@
           }
       );
       pointTimeline.addTo(map);
+
+      linestringTimeline.on('change', function(e){
+        updateList(e.target);
+        });
+       updateList(linestringTimeline);
       
       slider.addTimelines(linestringTimeline, pointTimeline);
     </script>
