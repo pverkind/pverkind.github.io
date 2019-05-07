@@ -1,3 +1,5 @@
+Live version: [https://pverkind.github.io/mintsOfEmpire/](https://pverkind.github.io/mintsOfEmpire/)
+
 This is a timeline of Islamic mints until the year 399AH / 1009 CE, produced in the framework of the ERC project [The Early Islamic Empire at Work](https://www.islamic-empire.uni-hamburg.de) at Hamburg University.
 You can view the active mints per decade or per year.
 Each of the metal types (gold dīnārs, silver dirhams, copper fulūs) are represented by a circle segment.
